@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!-- saved from url=(0028)https://map-gen.netlify.app/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>Map</title>
+
+    <script type="text/javascript" src="./Map_files/d3.js.download"></script>
+    <script type="text/javascript" src="./Map_files/priority-queue.js.download"></script>
+    <script type="text/javascript" src="./Map_files/language.js.download"></script>
+    <script type="text/javascript" src="./Map_files/terrain.js.download"></script>
+
+    <script type="text/javascript" src="./Map_files/pablo.js.download"></script>
+
+    <link href="./Map_files/style.css" rel="stylesheet">
+
+</head>
+
+<body>
+    <div>
+        <p> This is a UI for the map generation library created by mewo2. You can find the library at
+            <a target="_blank" href="https://github.com/mewo2/terrain">github</a> and the creator's <a target="_blank" href="http://mewo2.com/notes/terrain/">write up</a>. I have no affiliation with mewo2. This is just a tool to make generating maps easier
+        </p>
+
+        <p> You can adjust the parameters here then hit generate map to create the image. You can then edit the names of the locations. Finally you can download the generated svg image by hitting the download svg button. Once you have downloaded it you can
+            make further edits in an svg editor such as <a target="_blank" href="https://inkscape.org/en/">inkscape</a>.
+        </p>
+    </div>
+
+
+
+    <div id="controls">
+        <label>Number of points
+            <input type="number" value="16384" id="npts">
+        </label>
+        <label>Number of cities
+            <input type="number" value="15" id="ncities">
+        </label>
+        <label>Number of territories
+            <input type="number" value="5" id="nterrs">
+        </label>
+        <label>Width
+            <input type="number" value="400" id="width">
+        </label>
+        <label>Height
+            <input type="number" value="400" id="height">
+        </label>
+
+        <label>Region font size
+            <input type="number" value="40" id="fontsizes-region">
+        </label>
+
+        <label>City font size
+            <input type="number" value="25" id="fontsizes-city">
+        </label>
+
+        <label>Town font size
+            <input type="number" value="20" id="fontsizes-town">
+        </label>
+    <button>Generate map</button><button>Save as svg</button></div>
+
+    <div id="target">
+
+    <svg height="400" width="400" viewBox="-500 -500 1000 1000"></svg></div>
+
+    <div id="labels">
+
+    </div>
+
+    <script type="text/javascript" src="./Map_files/gen.js.download"></script>
+
+
+
+</body></html>
