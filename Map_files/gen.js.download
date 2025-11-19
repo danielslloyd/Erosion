@@ -1,0 +1,125 @@
+var svgStyle = `
+path, line {
+    fill: none;
+    stroke: black;
+    stroke-linecap: round;
+}
+
+.field {
+    stroke: none;
+    fill-opacity: 1.0;
+}
+
+.slope {
+    stroke-width: 1;
+}
+
+.river {
+    stroke-width: 2;
+}
+
+.coast {
+    stroke-width: 4;
+}
+
+.border {
+    stroke-width: 5;
+    stroke-dasharray: 4,4;
+    stroke-linecap: butt;
+}
+
+text {
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+    color: black;
+    stroke: white;
+    stroke-width: 5;
+    stroke-linejoin: round;
+    paint-order: stroke;
+}
+
+text.region {
+    stroke-width:10;
+    font-variant: small-caps;
+}
+
+svg {
+    background-color: white;
+}`;
+
+function addSVG(div) {
+    return div.insert("svg", ":first-child")
+        .attr("height", d3.select("#width").node().value)
+        .attr("width", d3.select("#height").node().value)
+        .attr("viewBox", "-500 -500 1000 1000");
+}
+
+function resizeSVG() {
+    d3.select("div#target svg", ":first-child")
+        .attr("height", d3.select("#width").node().value)
+        .attr("width", d3.select("#height").node().value);
+}
+
+function makeLabelEditor() {
+    var target = d3.select("div#labels");
+    target.selectAll("*").remove();
+    var allText = d3.selectAll('svg text');
+    allText.each(function(label, index) {
+        var newInput = target.insert("input", ":first-child");
+        newInput.attr("value", label.text);
+        newInput.on("change", function() {
+            document.getElementsByTagName('text')[index].innerHTML = this.value;
+        });
+    });
+}
+
+function makeSaveFunction() {
+    controls.append("button")
+        .text("Save as svg")
+        .on("click", function() {
+            var svg = document.getElementsByTagName("svg")[0];
+            var style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+            svg.insertBefore(style, svg.firstChild);
+            style.appendChild(document.createTextNode(svgStyle));
+            Pablo('svg').download('svg', 'map.svg');
+        });
+}
+
+function getMapParamaters() {
+    return {
+        extent: defaultExtent,
+        generator: generateCoast,
+        npts: d3.select("#npts").node().value,
+        ncities: d3.select("#ncities").node().value,
+        nterrs: d3.select("#nterrs").node().value,
+        fontsizes: {
+            region: d3.select("#fontsizes-region").node().value,
+            city: d3.select("#fontsizes-city").node().value,
+            town: d3.select("#fontsizes-town").node().value
+        }
+    };
+}
+
+
+
+var controls = d3.select("div#controls");
+var target = d3.select("div#target");
+var mapSvg = addSVG(target);
+
+
+controls.append("button")
+    .text("Generate map")
+    .on("click", function() {
+        resizeSVG();
+        doMap(mapSvg, getMapParamaters());
+        makeLabelEditor();
+    });
+    makeSaveFunction();
+
+
+/*
+controls.append("button")
+    .text("Save as PNG")
+    .on("click", function() {
+        Pablo('svg').download('png', 'map.png');
+    });
+*/

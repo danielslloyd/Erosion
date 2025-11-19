@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<!-- saved from url=(0031)http://mewo2.com/notes/terrain/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        
+
+
+        <link rel="stylesheet" href="./js/style.css">
+        <link href="./js/css" rel="stylesheet" type="text/css">
+        
+    </head>
+    <body>
+
+        <hr>
+        <div id="container">
+
+            <div id="content">
+<div class="note">
+    <h4>Generating fantasy maps</h4>
+    <script async="" src="./js/analytics.js"></script><script src="./js/d3.v4.js"></script>
+<script src="./js/priority-queue.js"></script>
+<style>
+    path, line {
+        fill: none;
+        stroke: black;
+        stroke-linecap: round;
+    }
+
+    .field {
+        stroke: none;
+        fill-opacity: 1.0;
+    }
+
+    .slope {
+        stroke-width: 1;
+    }
+
+    .river {
+        stroke-width: 2;
+    }
+
+    .coast {
+        stroke-width: 4;
+    }
+
+    .border {
+        stroke-width: 5;
+        stroke-dasharray: 4,4;
+        stroke-linecap: butt;
+    }
+
+    text {
+        font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+        color: black;
+        stroke: white;
+        stroke-width: 5;
+        stroke-linejoin: round;
+        paint-order: stroke;
+    }
+
+    text.region {
+        stroke-width:10;
+        font-variant: small-caps;
+    }
+
+    svg {
+        float: right;
+        background-color: white;
+    }
+</style>
+<script src="./js/language.js"></script>
+<script src="./js/terrain.js"></script>
+
+
+<div class="example" id="prim">
+</div>
+
+<h4>Erosion</h4>
+<div class="example" id="erode">
+</div>
+
+<h4>Rendering terrain</h4>
+<div class="example" id="phys">
+</div>
+
+<h4>Cities, borders</h4>
+<div class="example" id="city">
+</div>
+
+<h4>Placing labels</h4>
+<div class="example" id="final">
+</div>
+
+
+<script src="./js/terraincontrols.js"></script>
+    <hr>
+    
+    If you've enjoyed this piece, please consider <a href="https://www.patreon.com/mewo2">contributing on Patreon</a> so I can do more things like this.
+    
+</div>
+</div>
+        </div>
+        <div id="footer">
+            
+            
+        </div>
+        <!--- 
+        <script async="" src="./js/widgets.js" charset="utf-8"></script>
+        <script>
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('create', 'UA-31259805-1', 'auto');
+            ga('send', 'pageview');
+        </script>
+<iframe scrolling="no" frameborder="0" allowtransparency="true" src="./js/widget_iframe.8f764d5bd2778f88121d31d7d8d8e1e3.html" title="Twitter settings iframe" style="display: none;"></iframe>
+<iframe id="rufous-sandbox" scrolling="no" frameborder="0" allowtransparency="true" allowfullscreen="true" style="position: absolute; visibility: hidden; display: none; width: 0px; height: 0px; padding: 0px; border: none;" title="Twitter analytics iframe" src="./js/saved_resource.html"></iframe>
+--->
+</body></html>
