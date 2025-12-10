@@ -261,13 +261,13 @@
 
                 <label>Peak Height: <span class="range-value" id="peak-val">1.0</span></label>
                 <input type="range" id="peak-height" min="0.5" max="2.0" step="0.1" value="1.0" oninput="document.getElementById('peak-val').textContent=this.value">
-
-                <label>Sea Level: <span class="range-value" id="sea-val">0.4</span></label>
-                <input type="range" id="sea-level" min="0.1" max="0.7" step="0.05" value="0.4" oninput="document.getElementById('sea-val').textContent=this.value">
             </div>
 
             <div class="control-group">
                 <h2>A) Erosion & Cleanup</h2>
+                <label>Sea Level: <span class="range-value" id="sea-val">0.4</span></label>
+                <input type="range" id="sea-level" min="0.1" max="0.7" step="0.05" value="0.4" oninput="updateSeaLevel()">
+
                 <label>Erosion Iterations: <span class="range-value" id="erosion-val">5</span></label>
                 <input type="range" id="erosion-iters" min="0" max="20" value="5" oninput="document.getElementById('erosion-val').textContent=this.value">
 
@@ -292,8 +292,8 @@
                 <label>Brush Size: <span class="range-value" id="brush-val">0.05</span></label>
                 <input type="range" id="brush-size" min="0.02" max="0.15" step="0.01" value="0.05" oninput="document.getElementById('brush-val').textContent=this.value">
 
-                <label>Brush Strength: <span class="range-value" id="strength-val">0.3</span></label>
-                <input type="range" id="brush-strength" min="0.1" max="1.0" step="0.1" value="0.3" oninput="document.getElementById('strength-val').textContent=this.value">
+                <label>Brush Strength: <span class="range-value" id="strength-val">5.0</span></label>
+                <input type="range" id="brush-strength" min="0.5" max="10.0" step="0.5" value="5.0" oninput="document.getElementById('strength-val').textContent=this.value">
             </div>
 
             <div class="control-group">
@@ -313,6 +313,12 @@
                 <h2>View Options</h2>
                 <button class="btn-secondary" onclick="showHeightmap()">Show Heightmap</button>
                 <button class="btn-secondary" onclick="showTerrain()">Show Terrain</button>
+                <button class="btn-secondary" onclick="showCityValue()">Show City Value</button>
+
+                <div id="cityvalue-controls" style="display: none; margin-top: 10px;">
+                    <label>Number of Cities: <span class="range-value" id="cityvalue-n-val">1</span></label>
+                    <input type="range" id="cityvalue-n" min="0" max="30" value="1" oninput="updateCityValueView()">
+                </div>
             </div>
 
             <div class="control-group">
@@ -1319,9 +1325,11 @@
     var state = {
         mesh: null,
         h: null,
+        hBeforeSeaLevel: null, // Store heights before sea level adjustment
         render: null,
         paintMode: 'none',
-        isPainting: false
+        isPainting: false,
+        currentView: 'heightmap' // Track current view: 'heightmap', 'terrain', 'cityvalue'
     };
 
     var svg = d3.select('#map-svg');
@@ -1378,6 +1386,10 @@
         // Apply peaky transformation
         h = peaky(h);
 
+        // Store the pre-sea-level heights
+        state.hBeforeSeaLevel = h.slice();
+        state.hBeforeSeaLevel.mesh = state.mesh;
+
         // Set sea level
         h = setSeaLevel(h, seaLevel);
         h = fillSinks(h);
@@ -1414,6 +1426,11 @@
         }
 
         h = peaky(h);
+
+        // Store the pre-sea-level heights
+        state.hBeforeSeaLevel = h.slice();
+        state.hBeforeSeaLevel.mesh = state.mesh;
+
         h = setSeaLevel(h, seaLevel);
         h = fillSinks(h);
         h = cleanCoast(h, 2);
@@ -1440,7 +1457,7 @@
         state.h = doErosion(state.h, amount, iters);
         state.render.h = state.h;
 
-        showHeightmap();
+        refreshCurrentView();
         updateStatus('Erosion complete!');
     }
 
@@ -1457,20 +1474,31 @@
         state.h = cleanCoast(state.h, iters);
         state.render.h = state.h;
 
-        showHeightmap();
+        refreshCurrentView();
         updateStatus('Shoreline cleaned!');
     }
 
     function showHeightmap() {
         if (!state.h) return;
 
+        state.currentView = 'heightmap';
+        document.getElementById('cityvalue-controls').style.display = 'none';
+
         svg.selectAll('*').remove();
         visualizeVoronoi(svg, state.h);
+
+        // Draw sea level contour
+        var seaLevelContour = contour(state.h, 0);
+        drawPaths(svg, 'coast', seaLevelContour);
+
         updateStatus('Showing heightmap view');
     }
 
     function showTerrain() {
         if (!state.h) return;
+
+        state.currentView = 'terrain';
+        document.getElementById('cityvalue-controls').style.display = 'none';
 
         svg.selectAll('*').remove();
 
@@ -1488,6 +1516,85 @@
         visualizeSlopes(svg, {h: state.h});
 
         updateStatus('Showing terrain view');
+    }
+
+    function showCityValue() {
+        if (!state.h) {
+            updateStatus('Please generate a map first!');
+            return;
+        }
+
+        state.currentView = 'cityvalue';
+        document.getElementById('cityvalue-controls').style.display = 'block';
+
+        updateCityValueView();
+    }
+
+    function updateCityValueView() {
+        if (!state.h || state.currentView !== 'cityvalue') return;
+
+        var n = parseInt(document.getElementById('cityvalue-n').value);
+        document.getElementById('cityvalue-n-val').textContent = n;
+
+        svg.selectAll('*').remove();
+
+        // Calculate city scores progressively
+        var tempCities = [];
+        for (var i = 0; i < n; i++) {
+            var score = cityScore(state.h, tempCities);
+            var newcity = d3.scan(score, d3.descending);
+            if (newcity !== undefined) {
+                tempCities.push(newcity);
+            }
+        }
+
+        // Show the final city score after N cities
+        var finalScore = cityScore(state.h, tempCities);
+        visualizeVoronoi(svg, finalScore);
+
+        // Draw sea level contour
+        var seaLevelContour = contour(state.h, 0);
+        drawPaths(svg, 'coast', seaLevelContour);
+
+        updateStatus('Showing city value after ' + n + ' cities');
+    }
+
+    function updateSeaLevel() {
+        var seaLevel = parseFloat(document.getElementById('sea-level').value);
+        document.getElementById('sea-val').textContent = seaLevel;
+
+        if (!state.hBeforeSeaLevel || !state.mesh) return;
+
+        // Use the stored pre-sea-level heights
+        var h = state.hBeforeSeaLevel.slice();
+        h.mesh = state.mesh;
+
+        // Apply new sea level
+        h = setSeaLevel(h, seaLevel);
+        h = fillSinks(h);
+
+        state.h = h;
+        state.render.h = h;
+
+        refreshCurrentView();
+    }
+
+    function refreshCurrentView() {
+        if (!state.h) return;
+
+        switch(state.currentView) {
+            case 'heightmap':
+                showHeightmap();
+                break;
+            case 'terrain':
+                showTerrain();
+                break;
+            case 'cityvalue':
+                updateCityValueView();
+                break;
+            default:
+                showHeightmap();
+        }
     }
 
     function previewCities() {
@@ -1614,14 +1721,14 @@
             var vx = state.h.mesh.vxs[i];
             var dist = Math.sqrt((vx[0] - x) * (vx[0] - x) + (vx[1] - y) * (vx[1] - y));
             if (dist < brushSize) {
-                var strength = (1 - dist / brushSize) * brushStrength * 0.1;
+                var strength = (1 - dist / brushSize) * brushStrength;
                 state.h[i] += direction * strength;
             }
         }
 
         state.h.downhill = null; // Clear cached downhill
         state.render.h = state.h;
-        showHeightmap();
+        refreshCurrentView();
     }
 
     // Mouse event handlers for painting
