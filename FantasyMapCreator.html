@@ -1443,6 +1443,17 @@
         updateStatus('Terrain regenerated!');
     }
 
+    function syncHBeforeSeaLevel() {
+        if (!state.hBeforeSeaLevel || !state.mesh) return;
+        var seaLevel = parseFloat(document.getElementById('sea-level').value);
+        var delta = quantile(state.hBeforeSeaLevel, seaLevel);
+        state.hBeforeSeaLevel = state.h.slice();
+        state.hBeforeSeaLevel.mesh = state.mesh;
+        for (var i = 0; i < state.hBeforeSeaLevel.length; i++) {
+            state.hBeforeSeaLevel[i] += delta;
+        }
+    }
+
     function runErosion() {
         if (!state.h) {
             updateStatus('Please generate a map first!');
@@ -1456,6 +1467,7 @@
 
         state.h = doErosion(state.h, amount, iters);
         state.render.h = state.h;
+        syncHBeforeSeaLevel();
 
         refreshCurrentView();
         updateStatus('Erosion complete!');
@@ -1473,6 +1485,7 @@
 
         state.h = cleanCoast(state.h, iters);
         state.render.h = state.h;
+        syncHBeforeSeaLevel();
 
         refreshCurrentView();
         updateStatus('Shoreline cleaned!');
@@ -1736,8 +1749,8 @@
         if (state.paintMode !== 'none') {
             state.isPainting = true;
             var coords = d3.mouse(this);
-            var x = (coords[0] - 500) / 1000;
-            var y = (coords[1] - 500) / 1000;
+            var x = coords[0] / 1000;
+            var y = coords[1] / 1000;
             paintTerrain(x, y);
         }
     });
@@ -1745,13 +1758,14 @@
     svg.on('mousemove', function() {
         if (state.isPainting && state.paintMode !== 'none') {
             var coords = d3.mouse(this);
-            var x = (coords[0] - 500) / 1000;
-            var y = (coords[1] - 500) / 1000;
+            var x = coords[0] / 1000;
+            var y = coords[1] / 1000;
             paintTerrain(x, y);
         }
     });
 
     svg.on('mouseup', function() {
+        if (state.isPainting) syncHBeforeSeaLevel();
         state.isPainting = false;
     });
 
