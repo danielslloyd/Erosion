@@ -249,22 +249,19 @@
             <h1>Fantasy Map Creator</h1>
 
             <div class="control-group">
-                <h2>Generation</h2>
-                <button class="btn-primary" onclick="generateNewMap()">Generate Volcanic Island</button>
-                <button class="btn-secondary" onclick="regenerateTerrain()">Regenerate Terrain Only</button>
-            </div>
-
-            <div class="control-group">
-                <h2>Terrain Parameters</h2>
+                <h2>1. Generate</h2>
                 <label>Mesh Points: <span class="range-value" id="npts-val">8192</span></label>
                 <input type="range" id="npts" min="2048" max="16384" step="1024" value="8192" oninput="document.getElementById('npts-val').textContent=this.value">
 
                 <label>Peak Height: <span class="range-value" id="peak-val">1.0</span></label>
                 <input type="range" id="peak-height" min="0.5" max="2.0" step="0.1" value="1.0" oninput="document.getElementById('peak-val').textContent=this.value">
+
+                <button class="btn-primary" onclick="generateNewMap()">Generate Volcanic Island</button>
+                <button class="btn-secondary" onclick="regenerateTerrain()">Regenerate Terrain Only</button>
             </div>
 
             <div class="control-group">
-                <h2>A) Erosion & Cleanup</h2>
+                <h2>2. Refine Terrain</h2>
                 <label>Sea Level: <span class="range-value" id="sea-val">0.4</span></label>
                 <input type="range" id="sea-level" min="0.1" max="0.7" step="0.05" value="0.4" oninput="updateSeaLevel()">
 
@@ -280,10 +277,9 @@
                 <input type="range" id="cleanup-iters" min="0" max="10" value="3" oninput="document.getElementById('cleanup-val').textContent=this.value">
 
                 <button class="btn-warning" onclick="runShorelineCleanup()">Clean Shoreline</button>
-            </div>
 
-            <div class="control-group">
-                <h2>B) Terrain Painting</h2>
+                <div style="border-top: 1px solid #0f3460; margin: 10px 0;"></div>
+
                 <div class="paint-controls">
                     <button class="btn-raise" id="btn-raise" onclick="setPaintMode('raise')">Raise</button>
                     <button class="btn-lower" id="btn-lower" onclick="setPaintMode('lower')">Lower</button>
@@ -297,7 +293,7 @@
             </div>
 
             <div class="control-group">
-                <h2>C) Cities & Regions</h2>
+                <h2>3. Cities & Regions</h2>
                 <label>Number of Cities: <span class="range-value" id="cities-val">12</span></label>
                 <input type="range" id="ncities" min="3" max="30" value="12" oninput="document.getElementById('cities-val').textContent=this.value">
 
@@ -310,10 +306,10 @@
             </div>
 
             <div class="control-group">
-                <h2>View Options</h2>
-                <button class="btn-secondary" onclick="showHeightmap()">Show Heightmap</button>
-                <button class="btn-secondary" onclick="showTerrain()">Show Terrain</button>
-                <button class="btn-secondary" onclick="showCityValue()">Show City Value</button>
+                <h2>View Layers</h2>
+                <button class="btn-secondary" onclick="showHeightmap()">Heightmap</button>
+                <button class="btn-secondary" onclick="showTerrain()">Terrain</button>
+                <button class="btn-secondary" onclick="showCityValue()">City Value</button>
 
                 <div id="cityvalue-controls" style="display: none; margin-top: 10px;">
                     <label>Number of Cities: <span class="range-value" id="cityvalue-n-val">1</span></label>
@@ -1005,7 +1001,6 @@
         for (var i = 0; i < h.mesh.edges.length; i++) {
             var e = h.mesh.edges[i];
             if (e[3] == undefined) continue;
-            if (isnearedge(h.mesh, e[0]) || isnearedge(h.mesh, e[1])) continue;
             if ((h[e[0]] > level && h[e[1]] <= level) ||
                 (h[e[1]] > level && h[e[0]] <= level)) {
                 edges.push([e[2], e[3]]);
